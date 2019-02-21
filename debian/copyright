@@ -1,0 +1,84 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: nagios-plugins-lcgdm
+Source: https://twiki.cern.ch/twiki/bin/view/DPM/WebHome
+#
+# Please double check copyright with the licensecheck(1) command.
+
+Files:     README
+           plugins/check_cpu
+           plugins/check_dpm
+           plugins/check_dpm_filesystem
+           plugins/check_dpm_infosys
+           plugins/check_dpm_perf
+           plugins/check_dpm_pool
+           plugins/check_dpm_req
+           plugins/check_dpns
+           plugins/check_dpns_perf
+           plugins/check_filesystem_rw
+           plugins/check_gridftp
+           plugins/check_gridftp_activity
+           plugins/check_gridftp_transfer
+           plugins/check_hostcert
+           plugins/check_lfc_perf
+           plugins/check_network
+           plugins/check_nfs
+           plugins/check_oracle_expiration
+           plugins/check_partition_activity
+           plugins/check_process
+           plugins/check_request_per_user
+           plugins/check_rfio
+           plugins/check_rfio_activity
+           plugins/check_space_token
+           CMakeLists.txt
+           RELEASE-NOTES
+           configs/CMakeLists.txt
+           configs/lcgdm-common.cfg.in
+           configs/lcgdm-disk.cfg.in
+           configs/lcgdm-headnode.cfg.in
+           configs/lcgdm-lfc.cfg.in
+           configs/nrpe
+           configs/nrpe.cfg
+           dist/nagios-plugins-lcgdm.spec
+           dist/patches/glite-nagios-common.patch
+           examples/CMakeLists.txt
+           examples/generic-service.cfg
+           examples/lcgdm-commands.cfg.in
+           examples/lcgdm-hosts.cfg
+           examples/lcgdm-services.cfg
+           plugins/CMakeLists.txt
+           plugins/check_lfc_sam
+           plugins/lfcmetrics/__init__.py
+           plugins/lfcmetrics/threadpool.py
+           plugins/setup.py
+           templates.pnp4/*
+           plugins/lcgdmcommon.py
+	   LICENSE
+Copyright: 2011 the European Middleware Initiative
+           Members of the EGEE Collaboration. 2011. See http://www.eu-egee.org/partners/ for details on the copyright holders.
+License:   Apache-2.0
+
+Files:     plugins/lfcmetrics/lfcmetrics.py
+           plugins/LFC-probe
+Copyright: 2009 Members of the EGEE Collaboration. http://www.eu-egee.org/partners/
+License:   Apache-2.0
+
+Files:     debian/*
+Copyright: 2019 NWO-I/Nikhef
+License:   Apache-2.0
+
+License:   Apache-2.0
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ .
+ http://www.apache.org/licenses/LICENSE-2.0
+ .
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ .
+ On Debian systems, the complete text of the Apache License Version 2.0
+ can be found in `/usr/share/common-licenses/Apache-2.0'.
+

@@ -1,0 +1,36 @@
+Source: nagios-plugins-lcgdm
+Section: admin
+Priority: optional
+Maintainer: Dennis van Dok <dennisvd@nikhef.nl>
+Build-Depends: cmake, debhelper (>=9), python-all, dh-python
+Standards-Version: 3.9.8
+Homepage: https://twiki.cern.ch/twiki/bin/view/DPM/WebHome
+
+Package: nagios-plugins-lcgdm
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${python:Depends}
+Description: Nagios probes to be run remotely against DPM / LFC nodes
+ This package provides the nagios probes for LCGDM components (DPM and LFC) that 
+ need to be run remotely. Usually they are installed in the nagios host, and
+ they will contact the remote services running in the DPM and LFC hosts.
+ . 
+ The Disk Pool Manager (DPM) is a lightweight grid storage component, allowing
+ access to data using commonly used grid protocols. The LCG File Catalog (LFC)
+ is the main catalog being used by grid communities for both file bookkeeping
+ and meta-data.
+
+Package: nagios-plugins-lcgdm-common
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${python:Depends}
+Description: Nagios probes to be run remotely against DPM / LFC nodes
+ This package provides the nagios probes for LCGDM components (DPM and LFC) that 
+ need to be run remotely. Usually they are installed in the nagios host, and
+ they will contact the remote services running in the DPM and LFC hosts.
+ . 
+ The Disk Pool Manager (DPM) is a lightweight grid storage component, allowing
+ access to data using commonly used grid protocols. The LCG File Catalog (LFC)
+ is the main catalog being used by grid communities for both file bookkeeping
+ and meta-data.
+

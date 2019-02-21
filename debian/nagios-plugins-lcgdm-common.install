@@ -1,0 +1,9 @@
+etc/nrpe.d/lcgdm-common.cfg
+usr/lib/nagios/plugins/lcgdm/check_cpu
+usr/lib/nagios/plugins/lcgdm/check_hostcert
+usr/lib/nagios/plugins/lcgdm/check_network
+usr/lib/nagios/plugins/lcgdm/check_process
+usr/lib/nagios/plugins/lcgdm/lcgdmcommon.py
+usr/share/nagios/html/pnp4nagios/templates.lcgdm/check_cpu.php
+usr/share/nagios/html/pnp4nagios/templates.lcgdm/check_network.php
+usr/share/nagios/html/pnp4nagios/templates.lcgdm/check_process.php

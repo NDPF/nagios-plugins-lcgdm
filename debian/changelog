@@ -1,0 +1,5 @@
+nagios-plugins-lcgdm (0.9.6-1) bionic; urgency=low
+
+  * Initial release.
+
+ -- Dennis van Dok <dennisvd@nikhef.nl>  Thu, 21 Feb 2019 12:38:54 +0100

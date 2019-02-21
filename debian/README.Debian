@@ -1,0 +1,11 @@
+nagios-plugins-lcgdm for Debian
+
+This package is originally part of the LCGDM software and has never
+been packaged for Debian. The common plug-ins however are generic
+enough to be used outside of their original context.
+
+None of the other plug-ins found in this source package are packaged
+in a binary package, so this should not be considered as a straight
+Debian port.
+
+ -- Dennis van Dok <dennisvd@nikhef.nl>, Fri, 22 Feb 2019 11:24:16 +0100
