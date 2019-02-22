@@ -1,0 +1,172 @@
+#!/usr/bin/env python
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2011.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        check_nfs
+#
+# DESCRIPTION : Ping a NFS server using rpcinfo
+#
+# AUTHORS :     Alexandre.beche@cern.ch
+#
+##############################################################################
+
+import os
+import re
+import time
+from lcgdmcommon import *
+
+class check_http:
+  "Checks if the nfs server is up, and the response times"
+  __version__     = "0.0.1"
+  __nagios_id__   = "DM-NFS"
+
+  # Defaults
+  DEFAULT_WARNING  = 300
+  DEFAULT_CRITICAL = 1000
+  DEFAULT_PORT     = None
+  DEFAULT_VERSION  = 4
+
+  # Specific parameters, where key = short, value = long (i.e. {"h":"help", "C:":"command="})
+  # getopt format. The long version will be the one passed even when the short is specified
+  __additional_opts__ = {"w:": "warning=",
+                         "c:": "critical=",
+                         "H:": "host=",
+                         "p:": "port=",
+                         "v:": "version="}
+
+  # Specific usage information
+  __usage__ = """
+\t-w, --warning\tSets the warning value, in milliseconds. Default: %d
+\t-c, --critical\tSets the critical value, in milliseconds. Default: %d
+\t-H, --host\tThe host to query. If not specified, DPM_HOST will be used.
+\t-p, --port\tThe NFS port.
+\t-v, --version\tthe NFS version. Default: %d
+
+Make a ping on the http server to know if it currently working. Warning and critical threshold can be set to trigger alert if the ping delay is too hight.
+
+Description of work executed by the probe:
+
+\t1. Query the NFS daemon using the tool rpcinfo
+\t\tServer alive if awnser: 'program <p> version <v> ready and waiting' 
+\t\tServer down if answer: 'program <p> version <v> is not available' 
+\t2. Returns time to execute the request to nagios
+\t\tWarning state is triggered if request is longer than 0.3s
+\t\tCritical state is triggered if request is longer than 1s
+""" % (DEFAULT_WARNING, DEFAULT_CRITICAL, DEFAULT_VERSION)
+
+  # Methods
+
+  def __init__(self, opt = {}, args = []):
+    """
+    Constructor
+
+    @param opt  Contains a dictionary with the long option name as the key, and the argument as value
+    @param args Contains the arguments not associated with any option
+    """
+    # Warning and critical
+    opt_warning  = self.DEFAULT_WARNING
+    opt_critical = self.DEFAULT_CRITICAL
+    opt_port     = self.DEFAULT_PORT
+    opt_version  = self.DEFAULT_VERSION
+
+    if "warning" in opt:
+      opt_warning = opt["warning"]
+    if "critical" in opt:
+      opt_critical = opt["critical"]
+    if "port" in opt:
+      opt_port = opt["port"]
+    if "version" in opt:
+      opt_version = opt["version"]
+
+
+    self.warning  = float(opt_warning)  / 1000
+    self.critical = float(opt_critical) / 1000
+    self.port     = opt_port
+    self.version  = opt_version
+
+    # Host
+    if "host" in opt:
+      self.host = opt["host"]
+    elif "DPM_HOST" in os.environ:
+      self.host = os.environ["DPM_HOST"]
+
+  def main(self):
+    """
+    Test code itself. May raise exceptions.
+
+    @return A tuple (exit code, message, performance)
+    """
+
+    # Return an error if no hast has been detected
+    if self.host == None:
+      return (EX_CRITICAL, "No host set for the test", None)     
+
+    # Set the correct local lang for the result parsing
+    lang = "en_US.UTF-8" 
+    if os.environ["LANG"] != lang:
+      os.environ["LANG"] = lang
+
+    # Set the correct command line to execute
+    command_line = "rpcinfo -t %s nfs %d " % (self.host, self.version)
+    if self.port:
+      command_line += "-n %d" % (self.port)
+
+    # Redirect stderr to stdout
+    command_line += " 2>&1"
+
+    res = None
+    start, end = None, None
+    # Execute the command, trigger an error if a failure occurs
+    try:
+      start = time.time()
+      res = os.popen(command_line).readlines()
+      end = time.time()
+    except:
+      return (EX_CRITICAL, "An error occurs while querying the NFS server", None)
+
+    ellapsed_time = None    
+
+    # Handler for different kind of answer
+    for line in res:
+      if "ready and waiting" in line:
+        ellapsed_time = end - start
+      elif "unknown host" in line:
+        return (EX_CRITICAL, self.host + " is unreachable", None)
+      else: 
+        return (EX_CRITICAL, "NFS is not working", None)
+
+    # Trigger an unknown state if ellapsed time has not been set correctly 
+    if ellapsed_time is None:
+      return (EX_UNKNOWN, "An error occurs while checking the nfs service", None)
+
+    # Handle correct ouptup if probe ran correctly" 
+    if ellapsed_time > self.critical:
+      return_code = EX_CRITICAL
+    elif ellapsed_time > self.warning:
+      return_code = EX_WARNING
+    else:
+      return_code = EX_OK 
+ 
+    performance_data = "time=%.4fs;%.4f;%.4f" % (ellapsed_time, self.warning, self.critical)
+    return (return_code, "Test passed", performance_data)
+ 
+# When called directly
+if __name__ == "__main__":
+  run(check_http)
+

@@ -1,0 +1,3 @@
+command[check_lfc_perf]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_lfc_perf
+
+

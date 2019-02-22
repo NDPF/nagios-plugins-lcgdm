@@ -1,0 +1,4 @@
+command[check_partition_activity]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_partition_activity
+command[check_gridftp_activity]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_gridftp_activity
+command[check_gridftp_transfer]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_gridftp_transfer
+command[check_rfio_activity]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_rfio_activity

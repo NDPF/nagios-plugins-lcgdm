@@ -1,0 +1,7 @@
+command[check_dpm_infosys]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_dpm_infosys
+command[check_space_token]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_space_token -H 'hostname' -u 'user' -p 'password'
+command[check_dpm_pool]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_dpm_pool
+command[check_dpns_perf]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_dpns_perf
+command[check_dpm_perf]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_dpm_perf
+
+

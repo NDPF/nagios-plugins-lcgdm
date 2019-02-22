@@ -1,0 +1,61 @@
+* Wed Mar 06 2013 Ricardo Rocha <ricardo.rocha@cern.ch> - 0.9.5
+- Fixed bugs:
+  LCGDM-999: integrate SAM LFC probes into nagios lcgdm
+
+* Tue Oct 16 2012 Ricardo Rocha <ricardo.rocha@cern.ch> - 0.9.4
+- Fixed bugs:
+  LCGDM-747: check_dpm_infosys checking for srmv1 which is disabled
+  (follow up as we needed to change loops to use lists instead of tuples)
+
+* Tue Oct 16 2012 Ricardo Rocha <ricardo.rocha@cern.ch> - 0.9.3
+- Fixed bugs:
+  LCGDM-747: check_dpm_infosys checking for srmv1 which is disabled
+  LCGDM-746: nagios probe check_process taking long time
+
+* Wed Jul 11 2012 Ricardo Rocha <ricardo.rocha@cern.ch> - 0.9.1
+- Fixed bugs:
+  #540: check_process performance data fails if daemon has a '.'
+
+* Fri May 25 2012 Alexandre Beche <alexandre.beche@cern.ch> - 0.9.0-1
+- Renamed check_gridftp-rfio_transfer into check_*_activity
+- Added new check_gridftp_tranfer probe counting the number of gridftp transfer failures
+
+* Fri Apr 20 2012 Alexandre Beche <alexandre.beche@cern.ch> - 0.8.0-1
+- Split nagios-plugins-lcgdm into nagios-lcgdm for config and nagios-plugins-lcgdm for probes
+
+* Wed Feb 01 2012 Alexandre Beche <alexandre.beche@cern.ch> - 0.7.0-1
+- Removed MySQL-Python dependency
+- Merged patch for pnp4nagios templates
+
+* Fri Dec 16 2011 Alexandre Beche <alexandre.beche@cern.ch> - 0.6.0-1
+- Remove unused plugins (check_dpm_transfer, check_srm)
+- Pnp4nagios templates improvement
+
+* Sat Non 19 2011 Ricardo Rocha <ricardo.rocha@cern.ch> - 0.5.0
+- New probes
+  - gridftp/rfio transfer probes
+  - checking available space on disk nodes
+- Fixed descriptions on all probes
+- check_dpm_infosys now checks presence of local bdii
+- Dropped check_requests_per_vo, check_srm (functionality elsewhere)
+- Moved check_oracle_expiration to lfc package
+- check_gridftp/rfio now simply ping the service
+- Improvements in pnp4nagios plots
+- Packaging changes for epel
+
+* Wed Oct 26 2011 Ricardo Rocha <ricardo.rocha@cern.ch> - 0.4.0
+- Stop support alternative install locations (assume /usr)
+- Stopped packaging using cpack
+
+* Mon Sep 02 2011 Alexandre Beche <alexandre.beche@cern.ch> - 0.3.0
+- Fixed issue with constant notifications from probes
+- Reviewed rpm packaging (split per component)
+
+* Mon Aug 02 2011 Alexandre Beche <alexandre.beche@cern.ch> - 0.2.0
+- Added new nagios probes: 
+  - SRM success / failures
+  - Requests per VO
+  - Space monitoring grouped by VO
+
+* Mon Jul 01 2011 Alexandre Beche <alexandre.beche@cern.ch> - 0.1.0
+- First release

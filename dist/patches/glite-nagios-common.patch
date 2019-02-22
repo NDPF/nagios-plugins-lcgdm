@@ -1,0 +1,12 @@
+Index: dist/nagios-plugins-lcgdm.spec
+===================================================================
+--- dist/nagios-plugins-lcgdm.spec	(revision 5160)
++++ dist/nagios-plugins-lcgdm.spec	(working copy)
+@@ -33,7 +33,6 @@
+ %package -n nagios-plugins-lcgdm-common
+ Summary:	Common libraries and files to all LCGDM nagios packages
+ Group:		Applications/System
+-Requires:	nagios-common%{?_isa}
+ Requires:	nagios-plugins%{?_isa}
+ Requires:	nrpe%{?_isa}
+ Requires:	python%{?_isa}

@@ -1,0 +1,23 @@
+# default: off
+# description: NRPE (Nagios Remote Plugin Executor)
+service nrpe
+{
+        flags           = REUSE
+        type            = UNLISTED
+        port            = 5666
+        socket_type     = stream
+        wait            = no
+        user            = nagios
+        group           = nagios
+        server          = /usr/sbin/nrpe
+        server_args     = -c /etc/nagios/nrpe.cfg --inetd
+        log_on_failure  += USERID
+
+        env  = PYTHONPATH=/opt/lcg/lib/python:/opt/lcg/lib64/python:/usr/lib/python:/usr/lib64/python:/opt/lcg/lib/python2.4/site-packages:/opt/lcg/lib64/python2.4/site-packages:/usr/lib/python2.4/site-packages:/usr/lib64/python2.4/site-packages
+
+	env += PATH=/usr/kerberos/sbin:/usr/kerberos/bin:/opt/edg/bin:/opt/glite/bin:/opt/lcg/bin:/opt/globus/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
+
+        env += CSEC_MECH=ID
+
+}
+

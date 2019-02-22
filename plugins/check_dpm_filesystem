@@ -1,0 +1,195 @@
+#!/usr/bin/env python
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2011.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        check_dpm_filesystem
+#
+# DESCRIPTION : Checks the filesystem freespace and status
+#
+# AUTHORS :     Alexandre.beche@cern.ch
+#
+##############################################################################
+
+import os
+import re
+from lcgdmcommon import *
+
+class check_dpm_filesystem:
+  "Checks the DPM filesystem usage"
+  __version__     = "0.0.1"
+  __nagios_id__   = "DM-POOL"
+
+  # Defaults options
+  DEFAULT_WARNING  = "30"
+  DEFAULT_CRITICAL = "15"
+  DEFAULT_DETAILS = "critical"
+  DEFAULT_STATE    = "ALL"
+  DEFAULT_UNITS    = None
+
+  # Defaults states
+  DEFAULT  = 0
+  DISABLED = 1
+  RDONLY   = 2
+  
+  # Specific parameters, where key = short, value = long (i.e. {"h":"help", "C:":"command="})
+  # getopt format. The long version will be the one passed even when the short is specified
+  __additional_opts__ = {"w:": "warning=",
+                         "c:": "critical=",
+                         "d:": "details=",
+			 "p:": "pools=",
+                         "s:": "state=",
+	                 "u:": "units="}
+
+  # Specific usage information
+  __usage__ = """
+\t-w, --warning\tSets the warning limit for free space. It can be two values: pool. It accepts suffixes. (e.g. -w 100G). Default %s.
+\t-c, --critical\tSets the critical limit for free space. It can be two values: pool. It accepts suffixes. (e.g. -c 50G). Default %s.
+\t-d, --details\tDefault level of details in the performance data output. Possible values: critical, warning, all. (Default: %s).
+\t-p, --pools\tRestricts the pools to check to a list sparated by commas. (e.g. pool1,pool2)
+\t-s, --state\tRestricts the fs state to check to a list sparated by commas. (e.g. RDONLY,DISABLED,ALL)
+\t-u, --units\tAll  sizes are output in these units: (k)ilobytes, (m)egabytes,  (g)igabytes,  (t)erabytes, (p)etabytes. Capitalise  to use multiples of 1000 (S.I.) instead of 1024.
+
+Retreive DPM FS informations.
+""" % (DEFAULT_WARNING, DEFAULT_CRITICAL, DEFAULT_DETAILS)
+
+  # Methods
+  def __init__(self, opt = {}, args = []):
+    """
+    Constructor
+
+    @param opt  Contains a dictionary with the long option name as the key, and the argument as value
+    @param args Contains the arguments not associated with any option
+    """
+    # Pools
+    self.pools = None
+    if "pools" in opt:
+      self.pools = opt["pools"].split(',')
+
+    # States
+    self.state = [self.DEFAULT_STATE]
+    if "state" in opt:
+      self.state = opt["state"].split(",")
+
+    # Get other options
+    opt_warning  = self.DEFAULT_WARNING
+    opt_critical = self.DEFAULT_CRITICAL
+    opt_details = self.DEFAULT_DETAILS
+    opt_state    = self.DEFAULT_STATE
+    opt_units    = self.DEFAULT_UNITS
+ 
+    if "warning" in opt:
+      opt_warning = opt["warning"]
+    if "critical" in opt:
+      opt_critical = opt["critical"]
+    if "details" in opt:
+      opt_details = opt["details"]
+    if "units" in opt:
+      opt_units = opt["units"]
+
+    self.warning = real_bytes(opt_warning)
+    self.critical = real_bytes(opt_critical)
+    self.details = opt_details
+    self.units = opt_units
+    self.pools = None
+
+  # if the --pools option is set, restrain the results to that list 
+  def filter_pools(self, pool_array):
+    filtering_pool_array = []
+    for pool in pool_array:
+      if pool.poolname in self.pools:
+        filtering_pool_array.append(pool)
+    return filtering_pool_array
+
+
+  def main(self):
+    """
+    Test code itself. May raise exceptions.
+
+    @return A tuple (exit code, message, performance)
+    """
+    return_code = EX_OK
+
+    import dpm
+    # Get pools
+    (stat, pool_array) = dpm.dpm_getpools()
+    if stat != 0:
+      return (EX_UNKNOWN, "Could not get the pools (%d)" % dpm.C__dpm_errno(), None)
+
+    # if the --pools option is set, restrain the results to that list 
+    if self.pools is not None:
+      pool_array = self.filter_pools(pool_array)
+
+    critical, warning = 0, 0
+    critical_fs, warning_fs = "", ""
+    fs_summary = {}
+
+    # For each pool, retreive the list of filesystem 
+    for pool in pool_array:
+      _, filesystems = dpm.dpm_getpoolfs(pool.poolname) 
+      for fs in filesystems:
+
+        fs_name, fs_capacity, free_space = fs.fs, fs.capacity, fs.free
+        warning_threshold, critical_threshold = (self.warning * fs_capacity / 100), (self.critical * fs_capacity / 100)
+
+        
+        # Keep only FS with the wanted state (or ALL if flag set)
+        if ("ALL" not in self.state) and (fs.status not in self.state):
+          continue
+
+        # Case of critical state detected
+        if fs.free < critical_threshold:
+          if return_code < EX_CRITICAL:
+            return_code = EX_CRITICAL
+          critical += 1
+          if self.details in ["all", "critical", "warning"]:
+            fs_summary[fs.server+":"+fs.fs] = [fs.free, warning_threshold, critical_threshold, fs.capacity]
+
+        # Case of warning state detected
+        elif fs.free < warning_threshold: 
+          if return_code < EX_WARNING:
+            return_code = EX_WARNING
+          warning += 1
+          if self.details in ["all", "warning"]:
+            fs_summary[fs.server+":"+fs.fs] = [fs.free, warning_threshold, critical_threshold, fs.capacity]
+
+        elif self.details == "all":
+          fs_summary[fs.server+":"+fs.fs] = [fs.free, warning_threshold, critical_threshold, fs.capacity]
+
+
+    performance_data = ""
+    for key, value in fs_summary.iteritems():
+      performance_data += key
+      performance_data += "="
+      performance_data += str(standard_units(value[0], self.units))
+      if self.units is not None:
+        performance_data += str(self.units) 
+      performance_data += "B;"
+      performance_data += str(standard_units(value[1], self.units)) + ";"
+      performance_data += str(standard_units(value[2], self.units)) + ";0;" 
+      performance_data += str(standard_units(value[3], self.units)) + " "
+
+    
+    return_data = str(critical) + " criticals and " + str(warning) + " warnings" 
+
+    return (return_code, return_data, performance_data)
+
+# When called directly
+if __name__ == "__main__":
+  run(check_dpm_filesystem)
+

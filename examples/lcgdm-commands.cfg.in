@@ -1,0 +1,27 @@
+#
+# Command definition for nrpe and lcgdm-probes
+#
+define command{
+	command_name 	check_nrpe
+	command_line 	$USER1$/check_nrpe -H $HOSTADDRESS$ -c $ARG1$
+}
+
+define command{
+        command_name    check_gridftp
+        command_line    @CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_gridftp -H $HOSTGROUPMEMBERS:dpm-heads$
+}
+
+define command{
+        command_name    check_rfio
+        command_line    @CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_rfio -H $HOSTGROUPMEMBERS:dpm-heads$
+}
+
+define command{
+        command_name    check_dpm
+        command_line    @CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_dpm -H $HOSTGROUPMEMBERS:dpm-heads$
+}
+
+define command{
+        command_name    check_dpns
+        command_line    @CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_dpns -H $HOSTGROUPMEMBERS:dpm-heads$
+}

@@ -1,0 +1,156 @@
+#!/usr/bin/env python
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2011.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        check_request_per_user
+#
+# DESCRIPTION : Checks the available space per space token
+#
+# AUTHORS :     Alexandre.Beche@cern.ch
+#
+##############################################################################
+
+import commands
+import datetime
+import MySQLdb
+import os
+import time
+from lcgdmcommon import *
+
+class check_request_per_user:
+  """Checks the available space per space token"""
+  __version__      = "0.0.1"
+  __nagios_id__    = "DM-REQUEST-PER-USER"
+
+  DEFAULT_WARNING  = 30
+  DEFAULT_CRITICAL = 10
+  DEFAULT_INTERVAL = 10
+  DEFAULT_RESULTS  = 3
+  DEFAULT_HOST     = "localhost"
+
+  # Specific parameters, where key = short, value = long (i.e. {"h":"help", "C:":"command="})
+  # getopt format. The long version will be the one passed even when the short is specified
+  __additional_opts__ = {"w:": "warning=",
+                         "c:": "critical=",
+			 "i:": "interval=",
+			 "r:": "results=",
+			 "h:": "host=",
+                         "u:": "user=",
+			 "p:": "password="}
+
+  # Specific usage information
+  __usage__ = """
+\t-w, --warning\tDefault warning threshold in percent of unused space in a space token. (Default: %d ).
+\t-c, --critical\tDefault warning threshold in percent of unused space in a space token. (Default: %d ).
+\t-i, --period\tDefault interval of time to retrieve the request in minute. (Default: %d).
+\t-r, --restults\tLimit the query to the %d user with the max queries.
+\t-h, --host\tname of the machine which host the dpm_db database. (Default: %s).
+\t-u, --user\tusername used for login to the database.
+\t-p, --password\tpassword used for login to the database. 
+
+Description of work executed by the probe:
+
+""" % (DEFAULT_WARNING, DEFAULT_CRITICAL, DEFAULT_INTERVAL, DEFAULT_RESULTS, DEFAULT_HOST)
+
+  # Methods
+  def __init__(self, opt = {}, args = []):
+    """
+    Constructor
+
+    @param opt  Contains a dictionary with the long option name as the key, and the argument as value
+    @param args Contains the arguments not associated with any option
+    """
+
+    opt_warning = self.DEFAULT_WARNING
+    opt_critical = self.DEFAULT_CRITICAL
+    opt_interval = self.DEFAULT_INTERVAL
+    opt_results = self.DEFAULT_RESULTS
+    opt_host = self.DEFAULT_HOST
+    opt_user = None
+    opt_password = None
+
+    if "warning" in opt:
+      opt_warning = opt["warning"]
+    if "critical" in opt:
+      opt_critical = opt["critical"]
+    if "interval" in opt:
+      opt_interval = opt["interval"]
+    if "results" in opt:
+      opt_results = opt["results"]
+    if "host" in opt:
+      opt_host = opt["host"]
+    if "user" in opt:
+      opt_user = opt["user"]
+    if "password" in opt:
+      opt_password = opt["password"]
+
+    self.warning = int(opt_warning)
+    self.critical = int(opt_critical)
+    self.interval = int(opt_interval)
+    self.results = int(opt_results)
+    self.host = opt_host
+    self.user = opt_user
+    self.password = opt_password
+
+  def main(self):
+    """
+    Test code itself. May raise exceptions.
+
+    @return A tuple (exit code, message, performance)
+    """
+
+    return_code = EX_OK
+    return_data = ""
+    performance_data = ""
+
+    # Connect
+    try:
+      self.mysql = MySQLdb.connect(host = self.host,
+                                   user = self.user, passwd = self.password)
+    except:
+      return (EX_UNKNOWN, "Connection to the database failed", None)
+
+    # Use the correct DB
+    cursor = self.mysql.cursor()
+    cursor.execute("use dpm_db")
+
+    # Prepare the query
+    sql = "SELECT substring(client_dn,locate(\"CN=\", client_dn)+3), count(client_dn)"
+    sql += " FROM dpm_req"
+    sql += " WHERE ctime > (UNIX_TIMESTAMP(NOW())- " + str(self.interval * 60) + ")"
+    sql += " GROUP BY substring(client_dn,locate(\"CN=\", client_dn)+3)"
+    sql += " ORDER BY count(client_dn) DESC LIMIT " + str(self.results) + ";"; 
+
+    # Exeute the query
+    cursor.execute(sql)
+
+    total_request = 0   
+ 
+    for cn, requests in cursor.fetchall():
+      total_request += requests
+      performance_data += "\"" + cn + "\"=" + str(requests) + " " 
+
+    return_data = str(total_request) + " request(s) have been executed by the top " + str(self.results) + " DN" 
+    return (return_code, return_data, performance_data)
+
+
+# When called directly
+if __name__ == "__main__":
+  run(check_request_per_user)
+

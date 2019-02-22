@@ -1,0 +1,186 @@
+#!/usr/bin/env python
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2011.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        check_dpm_request
+#
+# DESCRIPTION : Checks the dpm request 
+#
+# AUTHORS :     Alexandre.Beche@cern.ch
+#
+##############################################################################
+
+import commands
+import datetime
+import MySQLdb
+import os
+import time
+from lcgdmcommon import *
+
+class check_dpm_request:
+  """Checks the dpm request """
+  __version__      = "0.0.1"
+  __nagios_id__    = "DM-REQUEST"
+
+  DEFAULT_WARNING  = 30
+  DEFAULT_CRITICAL = 10
+  DEFAULT_INTERVAL = 10
+  DEFAULT_HOST     = "localhost"
+  DEFAULT_STATUSES = "DPM_SUCCESS,DPM_QUEUED,DPM_ACTIVE,DPM_FAILED"
+
+  # Specific parameters, where key = short, value = long (i.e. {"h":"help", "C:":"command="})
+  # getopt format. The long version will be the one passed even when the short is specified
+  __additional_opts__ = {"w:": "warning=",
+                         "c:": "critical=",
+			 "i:": "interval=",
+			 "h:": "host=",
+                         "u:": "user=",
+			 "p:": "password=",
+			 "s:": "statuses="}
+
+  # Specific usage information
+  __usage__ = """
+\t-w, --warning\tDefault warning threshold in percent of unused space in a space token. (Default: %d ).
+\t-c, --critical\tDefault warning threshold in percent of unused space in a space token. (Default: %d ).
+\t-i, --period\tDefault interval of time to retrieve the request in minute. (Default: %d).
+\t-h, --host\tname of the machine which host the dpm_db database. (Default: %s).
+\t-u, --user\tusername used for login to the database.
+\t-p, --password\tpassword used for login to the database. 
+\t-s, --statuses\t list of statuses to retrieve. (default: %s).
+
+Description of work executed by the probe:
+
+""" % (DEFAULT_WARNING, DEFAULT_CRITICAL, DEFAULT_INTERVAL, DEFAULT_HOST, DEFAULT_STATUSES)
+
+  # Methods
+  def __init__(self, opt = {}, args = []):
+    """
+    Constructor
+
+    @param opt  Contains a dictionary with the long option name as the key, and the argument as value
+    @param args Contains the arguments not associated with any option
+    """
+
+    opt_warning = self.DEFAULT_WARNING
+    opt_critical = self.DEFAULT_CRITICAL
+    opt_interval = self.DEFAULT_INTERVAL
+    opt_host = self.DEFAULT_HOST
+    opt_statuses = self.DEFAULT_STATUSES
+    opt_user = None
+    opt_password = None
+
+    if "warning" in opt:
+      opt_warning = opt["warning"]
+    if "critical" in opt:
+      opt_critical = opt["critical"]
+    if "interval" in opt:
+      opt_interval = opt["interval"]
+    if "host" in opt:
+      opt_host = opt["host"]
+    if "user" in opt:
+      opt_user = opt["user"]
+    if "password" in opt:
+      opt_password = opt["password"]
+    if "statuses" in opt:
+      opt_statuses = opt["statuses"]
+
+    self.warning = int(opt_warning)
+    self.critical = int(opt_critical)
+    self.interval = int(opt_interval)
+    self.host = opt_host
+    self.user = opt_user
+    self.password = opt_password
+
+    # Define all existing statuses
+    # status name : status code (hexadecimal)
+    self.statuses = {0:"DPM_SUCCESS", 
+		1:"DPM_QUEUED",
+		2:"DPM_ACTIVE",	
+		3:"DPM_READY",
+		4:"DPM_RUNNING",
+		5:"DPM_DONE",
+		6:"DPM_FAILED",
+		7:"DPM_ABORTED",
+		8:"DPM_EXPIRED",
+		9:"DPM_RELEASED"}
+ 
+    # Keep only selected statuses, iteritems() is not usable in this case 
+    for status in self.statuses.keys():
+      if self.statuses[status] not in opt_statuses.split(","):
+        del self.statuses[status]
+
+  def main(self):
+    """
+    Test code itself. May raise exceptions.
+
+    @return A tuple (exit code, message, performance)
+    """
+
+    # Set all the code to 0 by default in order for pnp4nagios to plot them anyway
+    status_summary = {}
+    for status in self.statuses.values():
+      status_summary[status] = 0
+
+    return_code = EX_OK
+    return_data = ""
+    performance_data = ""
+
+    # Connect
+    try:
+      self.mysql = MySQLdb.connect(host = self.host,
+                                   user = self.user, passwd = self.password)
+    except:
+      return (EX_UNKNOWN, "Connection to the database failed", None)
+
+    # Use the correct DB
+    cursor = self.mysql.cursor()
+    cursor.execute("use dpm_db")
+
+    # Prepare the query
+    sql = "SELECT status, count(*)"
+    sql += " FROM dpm_req"
+    sql += " WHERE stime > (UNIX_TIMESTAMP(NOW())- " + str(self.interval * 60) + ")"
+    sql += " GROUP BY status"
+
+    # Exeute the query
+    cursor.execute(sql)
+
+    total_request, total_statuses = 0, 0   
+ 
+    # Retreive the results of the query
+    for status, requests in cursor.fetchall():
+      total_request += requests
+      total_statuses += 1
+
+      error_code_byte = int(hex(status)[2])
+      if error_code_byte in self.statuses.keys():
+        status_summary[self.statuses[error_code_byte]] = int(requests)
+
+    # Fill the perfdata
+    for status, requests in status_summary.iteritems(): 
+      performance_data += "\'" + status + "\'=" + str(requests) + " " 
+
+    return_data = str(total_request) + " request(s) have been executed representing " + str(total_statuses) + " statuses" 
+    return (return_code, return_data, performance_data)
+
+
+# When called directly
+if __name__ == "__main__":
+  run(check_dpm_request)
+

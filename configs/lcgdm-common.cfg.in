@@ -1,0 +1,5 @@
+command[check_cpu]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_cpu
+command[check_network]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_network 
+command[check_process]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_process -p rfiod,globus-gridftp-server
+command[check_hostcert]=@CMAKE_INSTALL_PREFIX@usr/lib@LIB_SUFFIX@/nagios/plugins/lcgdm/check_hostcert -C /etc/grid-security/hostcert.pem -s
+

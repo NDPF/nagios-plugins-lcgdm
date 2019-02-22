@@ -1,0 +1,144 @@
+#!/usr/bin/env python
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2011.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        check_filesystem_rw
+#
+# DESCRIPTION : Check if the filesystems are readable and writable
+#
+# AUTHORS :     Alexandre.beche@cern.ch
+#
+##############################################################################
+
+import os
+from lcgdmcommon import *
+
+class check_filesystem_rw:
+  "Checks if the mounted filesystem are readable and writable"
+  __version__     = "0.0.1"
+  __nagios_id__   = "DM-FS-RW"
+
+  DEFAULT_TYPES = "ext2,ext3"
+
+  # Specific parameters, where key = short, value = long (i.e. {"h":"help", "C:":"command="})
+  # getopt format. The long version will be the one passed even when the short is specified
+  __additional_opts__ = {"t:":"types="}
+
+  # Specific usage information
+  __usage__ = """
+\t-t, --types\tType of filesystem you want to check (default: %s)
+
+For each mounted filesystem, the probe checks if it is readable and writable.
+(Probe originally written in perl by Nikhef)
+
+Description of work executed by the probe:
+
+\t1. Retrieve filesystem informations from /etc/mounts".
+\t2. Check the mode (r, w, r/w) of each one.
+\t3. Trigger a Warning for each filesystem not writable.
+""" % (DEFAULT_TYPES)
+
+  # Methods
+  def __init__(self, opt = {}, args = []):
+    """
+    Constructor
+
+    @param opt  Contains a dictionary with the long option name as the key, and the argument as value
+    @param args Contains the arguments not associated with any option
+    """
+ 
+    opt_types = self.DEFAULT_TYPES
+
+    if "types" in opt:
+      opt_types = opt["types"]
+
+    self.types = opt_types.split(",")
+
+  def main(self):
+    """
+    Test code itself. May raise exceptions.
+
+    @return A tuple (exit code, message, performance)
+    """
+
+    # check_filesystem_rw:
+    # Checks that all mounted ext2, ext3 and xfs filesystems are mounted 'rw'
+
+    fstab = {}
+    mounts = {}
+
+    try:
+      for line in os.popen("cat /etc/fstab").readlines():
+        line = line.split()
+
+        # Save interesting informations
+        mnt, fs, options = line[1], line[2], line[3]
+        options = options.split(",")
+
+        # Keep only interesting type of FS
+        if fs not in self.types:
+          continue
+
+        for opt in options:
+          if opt in ['defaults', 'rw']:
+            fstab[mnt] = "rw"
+          elif opt == "ro":
+            fstab[mnt] = "ro"
+    except:
+      return (EX_UNKNOWN, "Failed to open /etc/fstab", None)
+
+    # read current local mounts
+    try:
+      for line in os.popen("cat /proc/mounts").readlines():
+        line = line.split()
+
+        # Save interesting informations    
+        mnt, fs, options = line[1], line[2], line[3]
+        options = options.split(",")
+ 
+        # Keep only interesting type of FS
+        if fs not in self.types:
+          continue
+
+        for opt in options:
+          if opt in ['ro', 'rw']:
+            mounts[mnt] = opt
+    except:
+      return (EX_UNKNOWN, "Failed to open /proc/mounts", None)
+
+    # Verify that every mountpoint in /etc/fstab is mounted with the correct options
+    exit = EX_OK
+
+    for mnt in fstab.keys():
+      if mnt not in mounts.keys():
+        msg += " %s(not mounted)" % (mnt)
+        exit = EX_CRITICAL
+
+      elif fstab[mnt] != mounts[mnt]:
+        msg += " %s(%s)" % (mnt, mounts[mnt])
+        exit = EX_CRITICAL;
+
+    if exit == EX_OK:
+      msg = "All filesystem are R/W"
+  
+    return (exit, msg, None)
+
+# When called directly
+if __name__ == "__main__":
+  run(check_filesystem_rw)
