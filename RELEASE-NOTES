@@ -1,3 +1,7 @@
+* Wed Jan 12 2021 Andrew Pickford <andrewp@nikhef.nl> - 0.9.7
+- Fixes for compatibility for python 3
+- Update packaging for rhel 8
+
 * Wed Mar 06 2013 Ricardo Rocha <ricardo.rocha@cern.ch> - 0.9.5
 - Fixed bugs:
   LCGDM-999: integrate SAM LFC probes into nagios lcgdm
