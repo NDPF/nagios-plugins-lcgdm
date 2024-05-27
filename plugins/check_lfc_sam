@@ -16,7 +16,7 @@ import errno
 try:
     from gridmon import probe
     import lfc
-except ImportError,e:
+except ImportError as e:
     summary = "UNKNOWN: Error loading modules : %s" % (e)
     sys.stdout.write(summary+'\n')
     sys.stdout.write(summary+'\nsys.path: %s\n'% str(sys.path))
@@ -138,7 +138,7 @@ class LFCMetrics(probe.MetricGatherer) :
                     # lfc.lfc_getgrpbynam() swig wrap is buggy; use lfc2
                     import lfc2
                     gid = lfc2.lfc_getgrpbynam(self.voName)
-                except Exception, e:
+                except Exception as e:
                     return (3, "Couldn't add VO's root group write access ACL: %s" % str(e))
                 else:
                     _, acls_list = lfc.lfc_getacl(FILE_NAME,
@@ -156,7 +156,7 @@ class LFCMetrics(probe.MetricGatherer) :
                     acls_list.append(acl_m)
                     try:
                         lfc2.lfc_setacl(FILE_NAME, acls_list)
-                    except Exception, e:
+                    except Exception as e:
                         return (3, "Couldn't add VO's root group write access ACL: %s" % str(e))
 
         return (0, "OK")
@@ -186,7 +186,7 @@ class LFCMetrics(probe.MetricGatherer) :
 
         try:
             from SOAPpy import SOAPProxy, SOAPConfig, faultType
-        except ImportError, e:
+        except ImportError as e:
             return (3, "Cannot load SOAPpy to gather metric : %s"%e)
 
         c = SOAPConfig()
@@ -204,13 +204,13 @@ class LFCMetrics(probe.MetricGatherer) :
         try:
             try:
                 result = remote.listReplicas(inputDataType="lfn", inputData=FILE_NAME)
-            except faultType, fault:
+            except faultType as fault:
                 if fault.faultstring == 'InputData' :
                     return (2, "Could not find LFN : %s"%FILE_NAME)
                 if fault.faultstring == 'NoURLFound' :
                     return (2, "No PFN for LFN : %s"%FILE_NAME)
                 return (3, "Unknown SOAP Fault : %s"%fault)
-            except Exception, e:
+            except Exception as e:
                 return (3, "Unknown Exception : %s"%e)
 
         finally:

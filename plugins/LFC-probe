@@ -40,7 +40,7 @@ import sys
 try:
     from gridmon import probe
     from lfcmetrics.lfcmetrics import LFCMetrics as LFC
-except ImportError,e:
+except ImportError as e:
     summary = "UNKNOWN: Error loading modules : %s" % (e)
     sys.stdout.write(summary+'\n')
     sys.stdout.write(summary+'\nsys.path: %s\n'% str(sys.path))

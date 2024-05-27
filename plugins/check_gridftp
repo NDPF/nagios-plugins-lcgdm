@@ -118,7 +118,7 @@ Description of work executed by the probe:
     start = time.time() 
     try:
       lines = urllib.urlopen("http://"+self.host+":"+str(self.port)).readlines()
-    except Exception, e:
+    except Exception as e:
       return_message = str(e)
 
     end = time.time()

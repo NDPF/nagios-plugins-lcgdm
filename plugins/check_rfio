@@ -120,7 +120,7 @@ Description of work executed by the probe:
     start = time.time()
     try:
       urllib.urlopen("http://"+self.host+":"+str(self.port))
-    except Exception, e:
+    except Exception as e:
       exception = str(e)
 
     end = time.time()
