@@ -69,12 +69,15 @@ Group:		Applications/System
 Requires:	nagios-common%{?_isa}
 Requires:	nagios-plugins%{?_isa}
 Requires:	nrpe%{?_isa}
-%if 0%{?rhel} < 8
-Requires:	python%{?_isa}
-Requires:	python-dateutil
-%else
+%if 0%{?rhel} == 8
 Requires:       python36%{?_isa}
 Requires:       python3-dateutil
+%elif 0%{?rhel} == 9
+Requires:       python3
+Requires:       python3-dateutil
+%else
+Requires:       python%{?_isa}
+Requires:       python-dateutil
 %endif
 
 %description -n nagios-plugins-lcgdm-common
@@ -124,7 +127,11 @@ analysis, host certificate checks, etc.
 %setup -n %{name}-%{version}
 
 %build
+%if 0%{?rhel} < 9
 %cmake . -DCMAKE_INSTALL_PREFIX=/
+%else
+%cmake -B . -DCMAKE_INSTALL_PREFIX=/
+%endif
 
 make %{?_smp_mflags}
 
