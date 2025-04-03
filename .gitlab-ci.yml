@@ -16,7 +16,7 @@ variables:
  
 before_script:
   - apt-get -y update
-  - apt-get -y install devscripts
+  - apt-get -y install devscripts git-buildpackage
 
 .build_debian:
   stage: package
