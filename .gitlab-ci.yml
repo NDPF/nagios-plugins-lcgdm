@@ -15,7 +15,8 @@ variables:
   GBP_BUILD_CMD: "gbp buildpackage --git-ignore-branch --git-tarball-dir=origtargz --git-ignore-new --git-builder='sbuild -d $SCHROOT --build-dir=builddeb --dpkg-source-opts=\"--diff-ignore=origtargz --extend-diff-ignore=|.git\"'"
  
 before_script:
-  - apt install build-essential
+  - apt-get update
+  - apt-get install devscripts
 
 .build_debian:
   stage: package
