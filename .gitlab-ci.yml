@@ -22,7 +22,6 @@ before_script:
   variables:
     SCHROOT: unstable
     DISTRIBUTION: UNRELEASED
-  before_script: ""
   tags:
     - docker
   script:
