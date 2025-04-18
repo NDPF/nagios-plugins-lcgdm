@@ -6,7 +6,7 @@ stages:
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
 default:
-  image: localhost/image-mockbuilder
+  image: $CI_REGISTRY/pdp/ndpf/image-builder/debianbuilder
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
