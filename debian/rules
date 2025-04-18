@@ -3,10 +3,7 @@
 #export DH_VERBOSE = 1
 
 %:
-	dh $@ --with python2 
+	dh $@
 
 override_dh_auto_configure:
 	dh_auto_configure -- -DCMAKE_INSTALL_PREFIX=/ -DLIB_SUFFIX=""
-
-override_dh_python2:
-	dh_python2 /usr/lib/nagios/plugins

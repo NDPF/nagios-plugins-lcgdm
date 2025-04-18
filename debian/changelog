@@ -1,3 +1,9 @@
+nagios-plugins-lcgdm (0.9.7-2) unstable; urgency=medium
+
+  * Include patches for Python 3
+
+ -- Dennis van Dok <dennisvd@nikhef.nl>  Fri, 18 Apr 2025 15:04:08 +0200
+
 nagios-plugins-lcgdm (0.9.6-1) bionic; urgency=low
 
   * Initial release.
