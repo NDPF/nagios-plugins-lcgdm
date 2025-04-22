@@ -12,13 +12,19 @@ default:
 # only cache local items.
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  GBP_BUILD_CMD: "gbp buildpackage --git-ignore-branch --git-tarball-dir=origtargz --git-ignore-new --git-builder='sbuild -d $SCHROOT --build-dir=builddeb --dpkg-source-opts=\"--diff-ignore=origtargz --extend-diff-ignore=|.git\"'"
+  GBP_BUILD_CMD: "gbp buildpackage --git-ignore-branch --git-ignore-new --git-builder='sbuild -d $SCHROOT --build-dir=builddeb --dpkg-source-opts=\"--diff-ignore=origtargz --extend-diff-ignore=|.git\"'"
  
-before_script:
-  - apt-get -y update
-  - apt-get -y install devscripts git-buildpackage
+.make_origtargz:
+  stage: package
+  tags:
+    - docker
+  script:
+    VERSION=`dpkg-parsechangelog -S Version`
+    NAME=`dpkg-parsechangelog -S Source`
+    git-deborig
 
 .build_debian:
+  extends: .make_origtargz
   stage: package
   variables:
     SCHROOT: unstable
