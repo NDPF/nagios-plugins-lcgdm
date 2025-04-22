@@ -21,7 +21,7 @@ make_origtargz:
   script:
     - VERSION=`dpkg-parsechangelog -S Version`
     - NAME=`dpkg-parsechangelog -S Source`
-    - git-deborig HEAD
+    - git-deborig HEAD || true
     - ls -l ..
   artifacts:
     paths:
