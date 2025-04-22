@@ -21,8 +21,7 @@ make_origtargz:
   script:
     - VERSION=`dpkg-parsechangelog -S Version`
     - NAME=`dpkg-parsechangelog -S Source`
-    - echo "running git-deborig"
-    - git-deborig
+    - git-deborig HEAD
     - ls -l ..
 
 .build_debian:
