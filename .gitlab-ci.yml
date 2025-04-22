@@ -12,7 +12,7 @@ default:
 # only cache local items.
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  GBP_BUILD_CMD: "gbp buildpackage --git-ignore-branch --git-ignore-new --git-builder='sbuild -d $SCHROOT --build-dir=builddeb --dpkg-source-opts=\"--diff-ignore=origtargz --extend-diff-ignore=|.git\"'"
+  GBP_BUILD_CMD: "gbp buildpackage --git-no-create-orig --git-ignore-branch --git-ignore-new --git-builder='sbuild -d $SCHROOT --build-dir=builddeb --dpkg-source-opts=\"--diff-ignore=origtargz --extend-diff-ignore=|.git\"'"
  
 .make_origtargz:
   stage: package
