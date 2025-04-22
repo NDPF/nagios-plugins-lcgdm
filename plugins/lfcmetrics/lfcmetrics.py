@@ -47,8 +47,8 @@ try:
     from gridmon import utils as samutils
     from threadpool import ThreadPool
     import lfc2 as lfc
-except ImportError,e:
-    print "UNKNOWN: Error loading modules : %s" % (e)
+except ImportError as e:
+    print("UNKNOWN: Error loading modules : %s" % (e))
     sys.exit(3)
 
 class LFCMetrics(probe.MetricGatherer):
@@ -191,7 +191,7 @@ class LFCMetrics(probe.MetricGatherer):
             cmd = 'lfc-rm -f -r %s' % dirn
             try:
                 rc, _ = commands.getstatusoutput(cmd)
-            except Exception, e:
+            except Exception as e:
                 return False
             if rc == 0:
                 return True

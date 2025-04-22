@@ -26,6 +26,8 @@
 #
 ##############################################################################
 
+from __future__ import print_function
+
 import getopt
 import os
 import sys
@@ -76,7 +78,7 @@ def version(test):
 
   @param test The test
   """
-  print "%s v%s (%s %s)" % (test.__name__, test.__version__, PACKAGE_NAME, PACKAGE_VERSION)
+  print("%s v%s (%s %s)" % (test.__name__, test.__version__, PACKAGE_NAME, PACKAGE_VERSION))
 
 
 # Test usage
@@ -87,22 +89,22 @@ def usage(test):
 
   @param test A test instance
   """
-  print """
+  print("""
 %s
 
 Usage: %s [options]
 
 \t-h, --help\tShows this help
 \t-V, --version\tShows this plugin version
-\t-v, --verbose\tSets verbose mode""" % (test.__doc__, sys.argv[0])
+\t-v, --verbose\tSets verbose mode""" % (test.__doc__, sys.argv[0]))
 
   if test.__usage__:
-    print test.__usage__
+    print(test.__usage__)
 
-  print """Send and email to dpm-users-forum@cern.ch if you have questions
+  print("""Send and email to dpm-users-forum@cern.ch if you have questions
 regarding the use of this software. To submit patches or suggest improvements
 send an email to dpm-devel@cern.ch
-  """
+  """)
 
 
 # Reads the whole content of a file
@@ -385,11 +387,11 @@ def run(test):
     status = None
     try:
       instance = test(extra, args)
-    except KeyError, e:
-      print "UNKNOWN - Parameter %s is needed" % str(e)
+    except KeyError as e:
+      print("UNKNOWN - Parameter %s is needed" % str(e))
       sys.exit(EX_UNKNOWN)
-    except Exception, e:
-      print "UNKNOWN - %s" % str(e)
+    except Exception as e:
+      print("UNKNOWN - %s" % str(e))
       if verbose:
         traceback.print_exc()
       sys.exit(EX_UNKNOWN)
@@ -398,22 +400,22 @@ def run(test):
 
     # If available, print test prefix
     if '__nagios_id__' in dir(instance):
-      print instance.__nagios_id__,
+      print(instance.__nagios_id__, end=' ')
 
     # Print output with right prefix
     if status == EX_OK:
-      print "OK -",
+      print("OK -", end=' ')
     elif status == EX_WARNING:
-      print "WARNING -",
+      print("WARNING -", end=' ')
     elif status == EX_CRITICAL:
-      print "CRITICAL -",
+      print("CRITICAL -", end=' ')
     else:
-      print "UNKNOWN -",
+      print("UNKNOWN -", end=' ')
 
-    print output,
+    print(output, end=' ')
 
     if performance:
-      print "|", performance
+      print("|", performance)
     else:
       print
 
@@ -421,8 +423,8 @@ def run(test):
     sys.exit(status)
   except SystemExit:
     raise
-  except Exception, e:
-    print "CRITICAL - %s" % str(e)
+  except Exception as e:
+    print("CRITICAL - %s" % str(e))
     if verbose:
       traceback.print_exc(file = sys.stderr)
     sys.exit(EX_CRITICAL)

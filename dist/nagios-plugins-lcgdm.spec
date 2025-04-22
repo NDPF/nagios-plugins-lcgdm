@@ -5,12 +5,19 @@
 %define nagios_plugins_dir %{_libdir}/nagios/plugins
 %define pnp4nagios_templates_dir %{_datadir}/nagios/html/pnp4nagios/templates.lcgdm
 %define lpylib lfcmetrics
-%{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+
+%if 0%{?rhel} < 8
+%{!?python_sitelib: %global python_sitelib %(%{__python2} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+%define __python /usr/bin/python2
+%else
+%{!?python_sitelib: %global python_sitelib %(%{__python3} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+%define __python /usr/bin/python3
+%endif
 %define pylib %{python_sitelib}/%{lpylib}
 
 Name:		nagios-plugins-lcgdm
-Version:	0.9.6
-Release:	1%{?dist}
+Version:	%{__version}
+Release:	%{__release}%{?dist}
 Summary:	Nagios probes to be run remotely against DPM / LFC nodes
 Group:		Applications/Internet
 License:	ASL 2.0
@@ -25,7 +32,12 @@ Buildroot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:	cmake
 BuildRequires:	gcc-c++
+%if 0%{?rhel} < 8
 BuildRequires:  python
+%else
+BuildRequires:  python3
+BuildRequires:  platform-python-devel
+%endif
 
 Requires:	nagios-plugins-lcgdm-common%{?_isa} = %{version}-%{release}
 Requires:	php%{?_isa}
@@ -57,8 +69,16 @@ Group:		Applications/System
 Requires:	nagios-common%{?_isa}
 Requires:	nagios-plugins%{?_isa}
 Requires:	nrpe%{?_isa}
-Requires:	python%{?_isa}
-Requires:	python-dateutil
+%if 0%{?rhel} == 8
+Requires:       python36%{?_isa}
+Requires:       python3-dateutil
+%elif 0%{?rhel} == 9
+Requires:       python3
+Requires:       python3-dateutil
+%else
+Requires:       python%{?_isa}
+Requires:       python-dateutil
+%endif
 
 %description -n nagios-plugins-lcgdm-common
 LCGDM includes both the Disk Pool Manager (DPM) and LCG File Catalog (LFC)
@@ -80,7 +100,11 @@ analysis, host certificate checks, etc.
 Summary:	Nagios probes to be run in the DPM head node
 Group:		Applications/System
 Requires:	nagios-plugins-lcgdm-common%{?_isa} = %{version}-%{release}
+%if 0%{?rhel} < 8
 Requires:	python-ldap%{?_isa}
+%else
+Requires:       python3-ldap3%{?_isa}
+%endif
 
 %description -n nagios-plugins-dpm-head
 This package provides the LCGDM nagios probes to be run in the DPM head nodes.
@@ -103,7 +127,11 @@ analysis, host certificate checks, etc.
 %setup -n %{name}-%{version}
 
 %build
+%if 0%{?rhel} < 9
 %cmake . -DCMAKE_INSTALL_PREFIX=/
+%else
+%cmake -B . -DCMAKE_INSTALL_PREFIX=/
+%endif
 
 make %{?_smp_mflags}
 
@@ -116,8 +144,12 @@ make install DESTDIR=%{buildroot}
 # SAM-3278
 install --directory %{buildroot}%{pylib}
 install --mode 644 plugins/%{lpylib}/*.py %{buildroot}%{pylib}
-%{__python} plugins/setup.py install_lib -O1 --skip-build --build-dir=%{lpylib} --install-dir=%{buildroot}%{pylib}
-
+%if 0%{?rhel} < 8
+%{__python2} plugins/setup.py install_lib -O1 --skip-build --build-dir=%{lpylib} --install-dir=%{buildroot}%{pylib}
+%else
+%{__python3} plugins/setup.py install_lib -O1 --skip-build --build-dir=%{lpylib} --install-dir=%{buildroot}%{pylib}
+pathfix.py -pni "%{__python3} %{py3_shbang_opts}" %{buildroot}/usr/lib64/nagios/plugins/lcgdm/*
+%endif
 
 %clean
 rm -rf %{buildroot}
@@ -187,7 +219,7 @@ rm -rf %{buildroot}
 %{nagios_plugins_dir}/lcgdm/check_oracle_expiration
 %{nagios_plugins_dir}/lcgdm/check_lfc_sam
 %{nagios_plugins_dir}/lcgdm/LFC-probe
-%{pylib}/*.py*
+%{pylib}/*
 
 %changelog
 * Fri Jul 24 2015 Andrea Manzi <amanzi@cern.ch> - 0.9.6-1

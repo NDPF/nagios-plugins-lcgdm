@@ -26,9 +26,14 @@
 #
 ##############################################################################
 
-import commands
 import os
 import socket
+
+try:
+    import commands as process_cmd
+except ImportError:
+    import subprocess as process_cmd
+
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 from dateutil.tz import tzutc
@@ -98,7 +103,7 @@ Description of work executed by the probe:
     Executes openssl with the flag -field and returns the field
     value (no key)
     """
-    (error, value) = commands.getstatusoutput("openssl x509 -in %s -noout -%s" % (self.certificate, field))
+    (error, value) = process_cmd.getstatusoutput("openssl x509 -in %s -noout -%s" % (self.certificate, field))
     if error:
       raise IOError("openssl failed (%s)" % field)
     return value.split('=')[-1].strip()
@@ -114,7 +119,7 @@ Description of work executed by the probe:
       subject = self.get_cert_field("subject")
       start   = parse(self.get_cert_field("startdate"))
       end     = parse(self.get_cert_field("enddate"))
-    except Exception, e:
+    except Exception as e:
       return (EX_CRITICAL, "Error opening the certificate file: %s" % str(e), None)
 
     # Subject
