@@ -19,11 +19,11 @@ make_origtargz:
   tags:
     - docker
   script:
-    VERSION=`dpkg-parsechangelog -S Version`
-    NAME=`dpkg-parsechangelog -S Source`
-    echo "running git-deborig"
-    git-deborig
-    ls -l ..
+    - VERSION=`dpkg-parsechangelog -S Version`
+    - NAME=`dpkg-parsechangelog -S Source`
+    - echo "running git-deborig"
+    - git-deborig
+    - ls -l ..
 
 .build_debian:
   stage: package
