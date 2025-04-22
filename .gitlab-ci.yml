@@ -14,8 +14,8 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   GBP_BUILD_CMD: "gbp buildpackage --git-no-create-orig --git-ignore-branch --git-ignore-new --git-builder='sbuild -d $SCHROOT --build-dir=builddeb --dpkg-source-opts=\"--diff-ignore=origtargz --extend-diff-ignore=|.git\"'"
  
-.make_origtargz:
-  stage: package
+make_origtargz:
+  stage: .pre
   tags:
     - docker
   script:
@@ -26,7 +26,6 @@ variables:
     ls -l ..
 
 .build_debian:
-  extends: .make_origtargz
   stage: package
   variables:
     SCHROOT: unstable
