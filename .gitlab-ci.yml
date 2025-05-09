@@ -23,9 +23,11 @@ make_origtargz:
     - NAME=`dpkg-parsechangelog -S Source`
     - git-deborig HEAD || true
     - ls -l ..
+    - mkdir builddeb
+    - mv ../*.orig.tar.* builddeb/
   artifacts:
     paths:
-      - "../*.orig.tar.*"
+      - builddeb/
     when: on_success
     access: all
     expire_in: 30 days
@@ -40,13 +42,13 @@ make_origtargz:
     - mkdir builddeb
     - RELEASE=build1
     - MESSAGE="Automated build"
-    - ls -l ..
+    - cp builddeb/*.orig.tar.* ..
     - if [ "$NIGHTLY_BUILD" == 1 ]; then RELEASE=~`date +%Y%m%d`.$CI_COMMIT_SHORT_SHA; MESSAGE="Nightly build" ; fi
     - if [ -n "$CI_COMMIT_TAG" ]; then RELEASE=.release.$CI_COMMIT_TAG; MESSAGE="Tagged release $CI_COMMIT_TAG"; fi
     - dch -l${RELEASE}. --distribution $DISTRIBUTION "$MESSAGE"
     - apt-get -y build-dep .
     - gbp buildpackage --git-no-create-orig --git-ignore-branch --git-ignore-new --git-builder='debuild -uc -us --source-option="--extend-diff-ignore=|.git.*"'
-    - find ../ -type f -maxdepth 1 -exec mv {} builddeb/ \;
+    - find ../ -type f -maxdepth 1 -exec cp {} builddeb/ \;
   artifacts:
     paths:
       - builddeb/
