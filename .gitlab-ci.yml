@@ -39,7 +39,6 @@ make_origtargz:
   tags:
     - docker
   script:
-    - mkdir builddeb
     - RELEASE=build1
     - MESSAGE="Automated build"
     - cp builddeb/*.orig.tar.* ..
