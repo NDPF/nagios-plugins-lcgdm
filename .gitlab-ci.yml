@@ -56,8 +56,22 @@ make_origtargz:
     - if: $NIGHTLY_BUILD
   
 build_debian_bookworm:
+  image: $CI_REGISTRY/pdp/ndpf/image-builder/debianbuilder:12
   extends:
     - .build_debian
   variables:
     DISTRIBUTION: bookworm
-    SCHROOT: bookworm
+
+build_ubuntu_yammy:
+  image: $CI_REGISTRY/pdp/ndpf/image-builder/ubuntubuilder:22
+  extends:
+    - .build_debian
+  variables:
+    DISTRIBUTION: yammy
+
+build_ubuntu_noble:
+  image: $CI_REGISTRY/pdp/ndpf/image-builder/ubuntubuilder:24
+  extends:
+    - .build_debian
+  variables:
+    DISTRIBUTION: noble
