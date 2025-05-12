@@ -46,7 +46,7 @@ make_origtargz:
     - if [ -n "$CI_COMMIT_TAG" ]; then RELEASE=.release.$CI_COMMIT_TAG; MESSAGE="Tagged release $CI_COMMIT_TAG"; fi
     - dch -l${RELEASE}. --distribution $DISTRIBUTION "$MESSAGE"
     - apt-get -y build-dep .
-    - gbp buildpackage --git-no-create-orig --git-ignore-branch --git-ignore-new --git-builder='debuild -uc -us --source-option="--extend-diff-ignore=|.git.*"'
+    - gbp buildpackage --git-no-create-orig --git-ignore-branch --git-ignore-new --git-builder='debuild -uc -us -Zgzip --source-option="--extend-diff-ignore=|.git.*"'
     - find ../ -type f -maxdepth 1 -exec cp {} builddeb/ \;
   artifacts:
     paths:
