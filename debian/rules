@@ -9,4 +9,4 @@ override_dh_auto_configure:
 	dh_auto_configure -- -DCMAKE_INSTALL_PREFIX=/ -DLIB_SUFFIX=""
 
 override_dh_builddeb:
-    dh_builddeb -- -Zgzip
+	dh_builddeb -- -Zgzip
