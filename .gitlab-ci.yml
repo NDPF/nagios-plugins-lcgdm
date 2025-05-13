@@ -50,7 +50,7 @@ make_origtargz:
     - VERSION=`dpkg-parsechangelog -S Version`
     - apt-get -y build-dep .
     - gbp buildpackage --git-no-create-orig --git-ignore-branch --git-ignore-new --git-builder='debuild -uc -us -Zgzip --changes-option=-sa --source-option="--extend-diff-ignore=|.git.*"'
-    - dcmd mv ../${NAME}_${VERSION}*.changes builddeb/
+    - dcmd --no-orig mv ../${NAME}_${VERSION}*.changes builddeb/
   artifacts:
     paths:
       - builddeb/
