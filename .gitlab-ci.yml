@@ -40,6 +40,8 @@ make_origtargz:
   tags:
     - docker
   script:
+    - NAME=`dpkg-parsechangelog -S Source`
+    - VERSION=`dpkg-parsechangelog -S Version`
     - RELEASE=${DISTROTAG}
     - MESSAGE="Automated build"
     - cp builddeb/*.orig.tar.* ..
@@ -48,7 +50,7 @@ make_origtargz:
     - dch -l${RELEASE}. --distribution $DISTRIBUTION "$MESSAGE"
     - apt-get -y build-dep .
     - gbp buildpackage --git-no-create-orig --git-ignore-branch --git-ignore-new --git-builder='debuild -uc -us -Zgzip --changes-option=-sa --source-option="--extend-diff-ignore=|.git.*"'
-    - find ../ -type f -maxdepth 1 -exec cp {} builddeb/ \;
+    - dcmd mv ../${NAME}_${VERSION}-${RELEASE}*.changes builddeb/
   artifacts:
     paths:
       - builddeb/
