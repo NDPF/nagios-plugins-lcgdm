@@ -40,7 +40,7 @@ make_origtargz:
   tags:
     - docker
   script:
-    - RELEASE=${DISTROTAG}.1
+    - RELEASE=${DISTROTAG}
     - MESSAGE="Automated build"
     - cp builddeb/*.orig.tar.* ..
     - if [ "$NIGHTLY_BUILD" == 1 ]; then RELEASE=~`date +%Y%m%d`.$CI_COMMIT_SHORT_SHA; MESSAGE="Nightly build" ; fi
