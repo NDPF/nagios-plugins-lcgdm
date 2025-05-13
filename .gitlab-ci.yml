@@ -63,12 +63,12 @@ build_debian_bookworm:
   variables:
     DISTRIBUTION: bookworm
 
-build_ubuntu_yammy:
+build_ubuntu_jammy:
   image: $CI_REGISTRY/pdp/ndpf/image-builder/ubuntubuilder:22
   extends:
     - .build_debian
   variables:
-    DISTRIBUTION: yammy
+    DISTRIBUTION: jammy
 
 build_ubuntu_noble:
   image: $CI_REGISTRY/pdp/ndpf/image-builder/ubuntubuilder:24
