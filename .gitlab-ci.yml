@@ -36,10 +36,11 @@ make_origtargz:
   stage: package
   variables:
     DISTRIBUTION: UNRELEASED
+    DISTROTAG: build
   tags:
     - docker
   script:
-    - RELEASE=build1
+    - RELEASE=${DISTROTAG}.1
     - MESSAGE="Automated build"
     - cp builddeb/*.orig.tar.* ..
     - if [ "$NIGHTLY_BUILD" == 1 ]; then RELEASE=~`date +%Y%m%d`.$CI_COMMIT_SHORT_SHA; MESSAGE="Nightly build" ; fi
@@ -62,6 +63,7 @@ build_debian_bookworm:
     - .build_debian
   variables:
     DISTRIBUTION: bookworm
+    DISTROTAG: debian12
 
 build_ubuntu_jammy:
   image: $CI_REGISTRY/pdp/ndpf/image-builder/ubuntubuilder:22
@@ -69,6 +71,7 @@ build_ubuntu_jammy:
     - .build_debian
   variables:
     DISTRIBUTION: jammy
+    DISTROTAG: ubuntu22.04
 
 build_ubuntu_noble:
   image: $CI_REGISTRY/pdp/ndpf/image-builder/ubuntubuilder:24
@@ -76,3 +79,4 @@ build_ubuntu_noble:
     - .build_debian
   variables:
     DISTRIBUTION: noble
+    DISTROTAG: ubuntu24.04
